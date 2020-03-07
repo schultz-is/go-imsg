@@ -183,6 +183,29 @@ func TestReadIMsg(t *testing.T) {
 		})
 	}
 
+	// Ensure imsgs that have an invalid length aren't unmarshalled
+	buf = bytes.NewBuffer(
+		[]byte{
+			0, 0, 0, 0, // type
+			0, 0, // length < header size
+		},
+	)
+	_, err = ReadIMsg(buf)
+	if err == nil {
+		t.Fatalf("incorrectly read an imsg with invalidly small length")
+	}
+
+	buf = bytes.NewBuffer(
+		[]byte{
+			0, 0, 0, 0, // type
+			0xff, 0xff, // length > maximum size
+		},
+	)
+	_, err = ReadIMsg(buf)
+	if err == nil {
+		t.Fatalf("incorrectly read an imsg with invalidly large length")
+	}
+
 	// Restore the determined system endianness
 	endianness = systemEndianness
 }
