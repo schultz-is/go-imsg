@@ -164,3 +164,8 @@ func (im IMsg) MarshalBinary() ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
+
+// SystemEndianness returns the determined system byte order.
+func SystemEndianness() binary.ByteOrder {
+	return endianness
+}
