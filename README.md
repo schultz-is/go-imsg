@@ -173,4 +173,4 @@ cc cc cc cc  // pid
 ## Documentation
 
 Documentation for this package is available at
-[godoc.org](https://godoc.org/github.com/schultz-is/go-imsg).
+[pkg.go.dev](https://pkg.go.dev/github.com/schultz-is/go-imsg?tab=doc).
