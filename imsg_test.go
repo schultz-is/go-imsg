@@ -3,15 +3,18 @@ package imsg
 import (
 	"bytes"
 	"encoding/binary"
+	"reflect"
 	"testing"
 )
 
-var marshalTests = []struct {
+type marshalTest struct {
 	name              string
 	imsg              *IMsg
 	littleEndianBytes []byte
 	bigEndianBytes    []byte
-}{
+}
+
+var marshalTests = []marshalTest{
 	{
 		"Empty imsg",
 		&IMsg{},
@@ -88,11 +91,17 @@ func TestMarshalBinary(t *testing.T) {
 	// Store out the determined system endianness before manually manipulating it
 	systemEndianness := endianness
 
+	var (
+		tt     marshalTest
+		result []byte
+		err    error
+	)
+
 	// First run tests for little endian systems
 	endianness = binary.LittleEndian
-	for _, tt := range marshalTests {
+	for _, tt = range marshalTests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := tt.imsg.MarshalBinary()
+			result, err = tt.imsg.MarshalBinary()
 			if err != nil {
 				t.Error(err)
 			}
@@ -105,15 +114,62 @@ func TestMarshalBinary(t *testing.T) {
 
 	// Next run tests for big endian systems
 	endianness = binary.BigEndian
-	for _, tt := range marshalTests {
+	for _, tt = range marshalTests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := tt.imsg.MarshalBinary()
+			result, err = tt.imsg.MarshalBinary()
 			if err != nil {
 				t.Error(err)
 			}
 
 			if bytes.Compare(result, tt.bigEndianBytes) != 0 {
 				t.Errorf("big endian result does not match expected output")
+			}
+		})
+	}
+
+	// Restore the determined system endianness
+	endianness = systemEndianness
+}
+
+func TestReadIMsg(t *testing.T) {
+	// Store out the determined system endianness before manually manipulating it
+	systemEndianness := endianness
+
+	var (
+		tt   marshalTest
+		buf  *bytes.Buffer
+		imsg *IMsg
+		err  error
+	)
+
+	// First run tests for little endian systems
+	endianness = binary.LittleEndian
+	for _, tt = range marshalTests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf = bytes.NewBuffer(tt.littleEndianBytes)
+			imsg, err = ReadIMsg(buf)
+			if err != nil {
+				t.Error(err)
+			}
+
+			if !reflect.DeepEqual(*imsg, *(tt.imsg)) {
+				t.Errorf("little endian input does not match parsed result")
+			}
+		})
+	}
+
+	// Next run tests for big endian systems
+	endianness = binary.BigEndian
+	for _, tt = range marshalTests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf = bytes.NewBuffer(tt.bigEndianBytes)
+			imsg, err = ReadIMsg(buf)
+			if err != nil {
+				t.Error(err)
+			}
+
+			if !reflect.DeepEqual(*imsg, *(tt.imsg)) {
+				t.Errorf("little endian input does not match parsed result")
 			}
 		})
 	}
