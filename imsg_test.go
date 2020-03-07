@@ -107,7 +107,7 @@ func TestMarshalBinary(t *testing.T) {
 			}
 
 			if bytes.Compare(result, tt.littleEndianBytes) != 0 {
-				t.Fatalf("little endian result does not match expected output")
+				t.Fatalf("little endian result (% x) does not match expected output (% x)", result, tt.littleEndianBytes)
 			}
 		})
 	}
@@ -122,7 +122,7 @@ func TestMarshalBinary(t *testing.T) {
 			}
 
 			if bytes.Compare(result, tt.bigEndianBytes) != 0 {
-				t.Fatalf("big endian result does not match expected output")
+				t.Fatalf("big endian result (% x) does not match expected output (% x)", result, tt.bigEndianBytes)
 			}
 		})
 	}
@@ -153,7 +153,7 @@ func TestReadIMsg(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(imsg, tt.imsg) {
-				t.Fatalf("little endian input does not match parsed result")
+				t.Fatalf("little endian result (% x) does not match expected output (% x)", imsg, tt.imsg)
 			}
 		})
 	}
@@ -169,7 +169,7 @@ func TestReadIMsg(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(imsg, tt.imsg) {
-				t.Fatalf("little endian input does not match parsed result")
+				t.Fatalf("big endian result (% x) does not match expected output (% x)", imsg, tt.imsg)
 			}
 		})
 	}
