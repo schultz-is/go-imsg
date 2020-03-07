@@ -132,6 +132,9 @@ func (im IMsg) MarshalBinary() ([]byte, error) {
 		return nil, err
 	}
 
+	if im.Len() > MaxSizeInBytes {
+		return nil, errors.New("imsg: imsg exceeds maximum length")
+	}
 	err = binary.Write(&buf, endianness, uint16(im.Len()))
 	if err != nil {
 		return nil, err
