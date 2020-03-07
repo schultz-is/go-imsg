@@ -107,10 +107,12 @@ func ReadIMsg(r io.Reader) (*IMsg, error) {
 		return nil, err
 	}
 
-	im.Data = make([]byte, msgLen-HeaderSizeInBytes)
-	_, err = r.Read(im.Data)
-	if err != nil {
-		return nil, err
+	if msgLen > HeaderSizeInBytes {
+		im.Data = make([]byte, msgLen-HeaderSizeInBytes)
+		_, err = r.Read(im.Data)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return im, nil
