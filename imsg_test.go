@@ -213,3 +213,25 @@ func TestReadIMsg(t *testing.T) {
 	// Restore the determined system endianness
 	endianness = systemEndianness
 }
+
+func TestSystemEndianness(t *testing.T) {
+	// Store out the determined system endianness before manually manipulating it
+	systemEndianness := endianness
+
+	if endianness != SystemEndianness() {
+		t.Fatalf("determined endianness does not match expected value")
+	}
+
+	endianness = binary.LittleEndian
+	if endianness != SystemEndianness() {
+		t.Fatalf("determined endianness does not match expected value")
+	}
+
+	endianness = binary.BigEndian
+	if endianness != SystemEndianness() {
+		t.Fatalf("determined endianness does not match expected value")
+	}
+
+	// Restore the determined system endianness
+	endianness = systemEndianness
+}
