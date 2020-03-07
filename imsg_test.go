@@ -152,7 +152,7 @@ func TestReadIMsg(t *testing.T) {
 				t.Error(err)
 			}
 
-			if !reflect.DeepEqual(*imsg, *(tt.imsg)) {
+			if !reflect.DeepEqual(imsg, tt.imsg) {
 				t.Fatalf("little endian input does not match parsed result")
 			}
 		})
@@ -168,7 +168,7 @@ func TestReadIMsg(t *testing.T) {
 				t.Error(err)
 			}
 
-			if !reflect.DeepEqual(*imsg, *(tt.imsg)) {
+			if !reflect.DeepEqual(imsg, tt.imsg) {
 				t.Fatalf("little endian input does not match parsed result")
 			}
 		})
