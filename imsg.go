@@ -55,7 +55,9 @@ type IMsg struct {
 }
 
 // ComposeIMsg constructs an IMsg of the provided type. If the included
-// ancillary data is too large, an error is returned.
+// ancillary data is too large, an error is returned. When composing an IMsg
+// using this function, the PID field is filled in automatically by a call to
+// os.Getpid(). This can be overwritten as desired.
 func ComposeIMsg(
 	typ, peerID uint32,
 	data []byte,
