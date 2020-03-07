@@ -127,6 +127,15 @@ func TestMarshalBinary(t *testing.T) {
 		})
 	}
 
+	// Ensure imsgs that are too large can't be marshalled
+	imsg := &IMsg{
+		Data: make([]byte, MaxSizeInBytes),
+	}
+	_, err = imsg.MarshalBinary()
+	if err == nil {
+		t.Fatalf("incorrectly marshalled an imsg with oversized ancillary data")
+	}
+
 	// Restore the determined system endianness
 	endianness = systemEndianness
 }
