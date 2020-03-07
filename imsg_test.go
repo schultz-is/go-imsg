@@ -110,7 +110,7 @@ func TestMarshalBinary(t *testing.T) {
 				t.Error(err)
 			}
 
-			if bytes.Compare(result, tt.littleEndianBytes) != 0 {
+			if !bytes.Equal(result, tt.littleEndianBytes) {
 				t.Fatalf("little endian result (% x) does not match expected output (% x)", result, tt.littleEndianBytes)
 			}
 		})
@@ -125,7 +125,7 @@ func TestMarshalBinary(t *testing.T) {
 				t.Error(err)
 			}
 
-			if bytes.Compare(result, tt.bigEndianBytes) != 0 {
+			if !bytes.Equal(result, tt.bigEndianBytes) {
 				t.Fatalf("big endian result (% x) does not match expected output (% x)", result, tt.bigEndianBytes)
 			}
 		})
