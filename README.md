@@ -1,5 +1,7 @@
 # go-imsg
 
+![Tests](https://github.com/schultz-is/go-imsg/workflows/Tests/badge.svg)
+
 This package provides tooling around OpenBSD's
 [imsg functions](https://man.openbsd.org/imsg_init.3).These imsg functions are
 used for inter-process communication, generally over unix sockets, and generally
