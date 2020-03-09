@@ -150,7 +150,7 @@ func TestReadIMsg(t *testing.T) {
 
 	var (
 		tt   marshalTest
-		buf  *bytes.Buffer
+		buf  *bytes.Reader
 		imsg *IMsg
 		err  error
 	)
@@ -159,7 +159,7 @@ func TestReadIMsg(t *testing.T) {
 	endianness = binary.LittleEndian
 	for _, tt = range marshalTests {
 		t.Run(tt.name, func(t *testing.T) {
-			buf = bytes.NewBuffer(tt.littleEndianBytes)
+			buf = bytes.NewReader(tt.littleEndianBytes)
 			imsg, err = ReadIMsg(buf)
 			if err != nil {
 				t.Error(err)
@@ -175,7 +175,7 @@ func TestReadIMsg(t *testing.T) {
 	endianness = binary.BigEndian
 	for _, tt = range marshalTests {
 		t.Run(tt.name, func(t *testing.T) {
-			buf = bytes.NewBuffer(tt.bigEndianBytes)
+			buf = bytes.NewReader(tt.bigEndianBytes)
 			imsg, err = ReadIMsg(buf)
 			if err != nil {
 				t.Error(err)
@@ -188,7 +188,7 @@ func TestReadIMsg(t *testing.T) {
 	}
 
 	// Ensure imsgs that have an invalid length aren't unmarshalled
-	buf = bytes.NewBuffer(
+	buf = bytes.NewReader(
 		[]byte{
 			0, 0, 0, 0, // type
 			0, 0, // length < header size
@@ -199,7 +199,7 @@ func TestReadIMsg(t *testing.T) {
 		t.Fatalf("incorrectly read an imsg with invalidly small length")
 	}
 
-	buf = bytes.NewBuffer(
+	buf = bytes.NewReader(
 		[]byte{
 			0, 0, 0, 0, // type
 			0xff, 0xff, // length > maximum size
