@@ -48,6 +48,8 @@ $ go run main.go
 2009/11/10 23:00:00 &imsg.IMsg{Type:0x4d2, PeerID:0x0, PID:0x3, Data:[]uint8{0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21}, flags:0x0}
 ```
 
+[Open in go playground](https://play.golang.org/p/dZPkuEIlHDf)
+
 Creating an imsg can also be done manually:
 
 ```go
@@ -75,6 +77,8 @@ func main() {
 $ go run main.go
 2009/11/10 23:00:00 &imsg.IMsg{Type:0x4d2, PeerID:0x0, PID:0x0, Data:[]uint8{0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21}, flags:0x0}
 ```
+
+[Open in go playground](https://play.golang.org/p/KtS6eBVlpYi)
 
 ### Message Serialization
 
@@ -111,6 +115,8 @@ func main() {
 $ go run main.go
 2009/11/10 23:00:00 d2 04 00 00 1d 00 00 00 00 00 00 00 00 00 00 00 48 65 6c 6c 6f 2c 20 77 6f 72 6c 64 21
 ```
+
+[Open in go playground](https://play.golang.org/p/fedGWpZrRoj)
 
 ### Message Parsing
 
@@ -154,6 +160,8 @@ func main() {
 $ go run main.go
 2009/11/10 23:00:00 &imsg.IMsg{Type:0xaaaaaaaa, PeerID:0xbbbbbbbb, PID:0xcccccccc, Data:[]uint8{0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21}, flags:0x0}
 ```
+
+[Open in go playground](https://play.golang.org/p/awU33secF8G)
 
 
 ## Data Layout
