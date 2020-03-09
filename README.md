@@ -113,7 +113,7 @@ import (
 )
 
 func main() {
-  buf := bytes.NewBuffer(
+  buf := bytes.NewReader(
     []byte{
       0xaa, 0xaa, 0xaa, 0xaa, // type
       0x1d, 0x00,             // len
