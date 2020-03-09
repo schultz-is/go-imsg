@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"unsafe"
@@ -93,6 +94,14 @@ func ReadIMsg(r io.Reader) (*IMsg, error) {
 	err := binary.Read(r, endianness, &hdr)
 	if err != nil {
 		return nil, err
+	}
+
+	if hdr.Length < HeaderSizeInBytes {
+		return nil, fmt.Errorf("imsg: message length too small (%d bytes)", hdr.Length)
+	}
+
+	if hdr.Length > MaxSizeInBytes {
+		return nil, fmt.Errorf("imsg: message length too large (%d bytes)", hdr.Length)
 	}
 
 	im.Type = hdr.Type
