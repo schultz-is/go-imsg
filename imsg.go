@@ -163,6 +163,24 @@ func (im IMsg) MarshalBinary() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// UnmarshalBinary implements the encoding.BinaryUnmarshaler interface.
+func (im *IMsg) UnmarshalBinary(data []byte) error {
+	buf := bytes.NewReader(data)
+
+	im2, err := ReadIMsg(buf)
+	if err != nil {
+		return err
+	}
+
+	im.Type = im2.Type
+	im.PeerID = im2.PeerID
+	im.PID = im2.PID
+	im.Data = im2.Data
+	im.flags = im2.flags
+
+	return nil
+}
+
 // SystemEndianness returns the determined system byte order.
 func SystemEndianness() binary.ByteOrder {
 	return endianness

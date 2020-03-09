@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"reflect"
 	"testing"
@@ -60,64 +61,140 @@ func TestReadIMsg(t *testing.T) {
 	systemEndianness := endianness
 
 	var (
-		tt   imsgTest
-		buf  *bytes.Reader
-		imsg *IMsg
-		err  error
+		tt     imsgTest
+		buf    *bytes.Reader
+		result *IMsg
+		err    error
 	)
 
 	// First run tests for little endian systems
 	endianness = binary.LittleEndian
 	for _, tt = range unmarshalTests {
-		t.Run(tt.name, func(t *testing.T) {
-			buf = bytes.NewReader(tt.littleEndianBytes)
-			imsg, err = ReadIMsg(buf)
+		t.Run(
+			fmt.Sprintf("%s little endian", tt.name),
+			func(t *testing.T) {
+				buf = bytes.NewReader(tt.littleEndianBytes)
+				result, err = ReadIMsg(buf)
 
-			if tt.expectedErrorType == nil {
-				if err != nil {
-					t.Fatalf("unexpected ReadIMsg failure: %s", err)
-				}
+				if tt.expectedErrorType == nil {
+					if err != nil {
+						t.Fatalf("unexpected ReadIMsg failure: %s", err)
+					}
 
-				if !reflect.DeepEqual(imsg, tt.imsg) {
-					t.Fatalf("result of ReadIMsg does not match expected output (%#v != %#v)", imsg, tt.imsg)
-				}
-			} else {
-				if err == nil {
-					t.Fatalf("incorrectly read imsg")
-				}
+					if !reflect.DeepEqual(result, tt.imsg) {
+						t.Fatalf("result of ReadIMsg does not match expected output (%#v != %#v)", result, tt.imsg)
+					}
+				} else {
+					if err == nil {
+						t.Fatalf("incorrectly read imsg")
+					}
 
-				if !errors.As(err, &tt.expectedErrorType) {
-					t.Fatalf("failed to read imsg in unexpected way: %s", err)
+					if !errors.As(err, &tt.expectedErrorType) {
+						t.Fatalf("failed to read imsg in unexpected way: %s", err)
+					}
 				}
-			}
-		})
+			})
 	}
 
 	// Next run tests for big endian systems
 	endianness = binary.BigEndian
 	for _, tt = range unmarshalTests {
-		t.Run(tt.name, func(t *testing.T) {
-			buf = bytes.NewReader(tt.bigEndianBytes)
-			imsg, err = ReadIMsg(buf)
+		t.Run(
+			fmt.Sprintf("%s big endian", tt.name),
+			func(t *testing.T) {
+				buf = bytes.NewReader(tt.bigEndianBytes)
+				result, err = ReadIMsg(buf)
 
-			if tt.expectedErrorType == nil {
-				if err != nil {
-					t.Fatalf("unexpected ReadIMsg failure: %s", err)
-				}
+				if tt.expectedErrorType == nil {
+					if err != nil {
+						t.Fatalf("unexpected ReadIMsg failure: %s", err)
+					}
 
-				if !reflect.DeepEqual(imsg, tt.imsg) {
-					t.Fatalf("result of ReadIMsg does not match expected output (%#v != %#v)", imsg, tt.imsg)
-				}
-			} else {
-				if err == nil {
-					t.Fatalf("incorrectly read imsg")
-				}
+					if !reflect.DeepEqual(result, tt.imsg) {
+						t.Fatalf("result of ReadIMsg does not match expected output (%#v != %#v)", result, tt.imsg)
+					}
+				} else {
+					if err == nil {
+						t.Fatalf("incorrectly read imsg")
+					}
 
-				if !errors.As(err, &tt.expectedErrorType) {
-					t.Fatalf("failed to read imsg in unexpected way: %s", err)
+					if !errors.As(err, &tt.expectedErrorType) {
+						t.Fatalf("failed to read imsg in unexpected way: %s", err)
+					}
 				}
-			}
-		})
+			})
+	}
+
+	// Restore the determined system endianness
+	endianness = systemEndianness
+}
+
+func TestUnmarshalBinary(t *testing.T) {
+	// Store out the determined system endianness before manually manipulating it
+	systemEndianness := endianness
+
+	var (
+		tt     imsgTest
+		result *IMsg
+		err    error
+	)
+
+	// First run tests for little endian systems
+	endianness = binary.LittleEndian
+	for _, tt = range unmarshalTests {
+		t.Run(
+			fmt.Sprintf("%s little endian", tt.name),
+			func(t *testing.T) {
+				result = &IMsg{}
+				err = result.UnmarshalBinary(tt.littleEndianBytes)
+
+				if tt.expectedErrorType == nil {
+					if err != nil {
+						t.Fatalf("unexpected ReadIMsg failure: %s", err)
+					}
+
+					if !reflect.DeepEqual(result, tt.imsg) {
+						t.Fatalf("result of ReadIMsg does not match expected output (%#v != %#v)", result, tt.imsg)
+					}
+				} else {
+					if err == nil {
+						t.Fatalf("incorrectly read imsg")
+					}
+
+					if !errors.As(err, &tt.expectedErrorType) {
+						t.Fatalf("failed to read imsg in unexpected way: %s", err)
+					}
+				}
+			})
+	}
+
+	// Next run tests for big endian systems
+	endianness = binary.BigEndian
+	for _, tt = range unmarshalTests {
+		t.Run(
+			fmt.Sprintf("%s big endian", tt.name),
+			func(t *testing.T) {
+				result = &IMsg{}
+				err = result.UnmarshalBinary(tt.bigEndianBytes)
+
+				if tt.expectedErrorType == nil {
+					if err != nil {
+						t.Fatalf("unexpected ReadIMsg failure: %s", err)
+					}
+
+					if !reflect.DeepEqual(result, tt.imsg) {
+						t.Fatalf("result of ReadIMsg does not match expected output (%#v != %#v)", result, tt.imsg)
+					}
+				} else {
+					if err == nil {
+						t.Fatalf("incorrectly read imsg")
+					}
+
+					if !errors.As(err, &tt.expectedErrorType) {
+						t.Fatalf("failed to read imsg in unexpected way: %s", err)
+					}
+				}
+			})
 	}
 
 	// Restore the determined system endianness
@@ -137,53 +214,57 @@ func TestMarshalBinary(t *testing.T) {
 	// First run tests for little endian systems
 	endianness = binary.LittleEndian
 	for _, tt = range marshalTests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err = tt.imsg.MarshalBinary()
+		t.Run(
+			fmt.Sprintf("%s little endian", tt.name),
+			func(t *testing.T) {
+				result, err = tt.imsg.MarshalBinary()
 
-			if tt.expectedErrorType == nil {
-				if err != nil {
-					t.Fatalf("unexpected MarshalBinary failure: %s", err)
-				}
+				if tt.expectedErrorType == nil {
+					if err != nil {
+						t.Fatalf("unexpected MarshalBinary failure: %s", err)
+					}
 
-				if !bytes.Equal(result, tt.littleEndianBytes) {
-					t.Fatalf("result of MarshalBinary does not match expected output (% x != % x)", result, tt.littleEndianBytes)
-				}
-			} else {
-				if err == nil {
-					t.Fatal("incorrectly marshalled imsg to binary")
-				}
+					if !bytes.Equal(result, tt.littleEndianBytes) {
+						t.Fatalf("result of MarshalBinary does not match expected output (% x != % x)", result, tt.littleEndianBytes)
+					}
+				} else {
+					if err == nil {
+						t.Fatal("incorrectly marshalled imsg to binary")
+					}
 
-				if !errors.As(err, &tt.expectedErrorType) {
-					t.Fatalf("failed to marshal imsg to binary in unexpected way: %s", err)
+					if !errors.As(err, &tt.expectedErrorType) {
+						t.Fatalf("failed to marshal imsg to binary in unexpected way: %s", err)
+					}
 				}
-			}
-		})
+			})
 	}
 
 	// Next run tests for big endian systems
 	endianness = binary.BigEndian
 	for _, tt = range marshalTests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err = tt.imsg.MarshalBinary()
+		t.Run(
+			fmt.Sprintf("%s big endian", tt.name),
+			func(t *testing.T) {
+				result, err = tt.imsg.MarshalBinary()
 
-			if tt.expectedErrorType == nil {
-				if err != nil {
-					t.Fatalf("unexpected MarshalBinary failure: %s", err)
-				}
+				if tt.expectedErrorType == nil {
+					if err != nil {
+						t.Fatalf("unexpected MarshalBinary failure: %s", err)
+					}
 
-				if !bytes.Equal(result, tt.bigEndianBytes) {
-					t.Fatalf("result of MarshalBinary does not match expected output (% x != % x)", result, tt.bigEndianBytes)
-				}
-			} else {
-				if err == nil {
-					t.Fatal("incorrectly marshalled imsg to binary")
-				}
+					if !bytes.Equal(result, tt.bigEndianBytes) {
+						t.Fatalf("result of MarshalBinary does not match expected output (% x != % x)", result, tt.bigEndianBytes)
+					}
+				} else {
+					if err == nil {
+						t.Fatal("incorrectly marshalled imsg to binary")
+					}
 
-				if !errors.As(err, &tt.expectedErrorType) {
-					t.Fatalf("failed to marshal imsg to binary in unexpected way: %s", err)
+					if !errors.As(err, &tt.expectedErrorType) {
+						t.Fatalf("failed to marshal imsg to binary in unexpected way: %s", err)
+					}
 				}
-			}
-		})
+			})
 	}
 
 	// Restore the determined system endianness
@@ -210,4 +291,12 @@ func TestSystemEndianness(t *testing.T) {
 
 	// Restore the determined system endianness
 	endianness = systemEndianness
+}
+
+func TestLen(t *testing.T) {
+	imsg := &IMsg{}
+
+	if imsg.Len() != HeaderSizeInBytes {
+		t.Fatalf("empty imsg length (%d) should match header length (%d)", imsg.Len(), HeaderSizeInBytes)
+	}
 }
