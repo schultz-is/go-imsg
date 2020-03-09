@@ -40,6 +40,15 @@ func init() {
 	}
 }
 
+// This is a fixed-size header used to simplify marshaling and unmarshaling.
+type imsgHeader struct {
+	Type   uint32
+	Length uint16
+	Flags  uint16
+	PeerID uint32
+	PID    uint32
+}
+
 // An IMsg is a message used to aid inter-process communication over sockets,
 // often when processes with different privileges are required to cooperate.
 type IMsg struct {
@@ -80,37 +89,19 @@ func ComposeIMsg(
 func ReadIMsg(r io.Reader) (*IMsg, error) {
 	im := &IMsg{}
 
-	err := binary.Read(r, endianness, &(im.Type))
+	var hdr imsgHeader
+	err := binary.Read(r, endianness, &hdr)
 	if err != nil {
 		return nil, err
 	}
 
-	var msgLen uint16
-	err = binary.Read(r, endianness, &msgLen)
-	if err != nil {
-		return nil, err
-	}
-	if msgLen < HeaderSizeInBytes || msgLen > MaxSizeInBytes {
-		return nil, errors.New("imsg: invalid imsg length received")
-	}
+	im.Type = hdr.Type
+	im.PeerID = hdr.PeerID
+	im.PID = hdr.PID
+	im.flags = hdr.Flags
 
-	err = binary.Read(r, endianness, &(im.flags))
-	if err != nil {
-		return nil, err
-	}
-
-	err = binary.Read(r, endianness, &(im.PeerID))
-	if err != nil {
-		return nil, err
-	}
-
-	err = binary.Read(r, endianness, &(im.PID))
-	if err != nil {
-		return nil, err
-	}
-
-	if msgLen > HeaderSizeInBytes {
-		im.Data = make([]byte, msgLen-HeaderSizeInBytes)
+	if hdr.Length > HeaderSizeInBytes {
+		im.Data = make([]byte, hdr.Length-HeaderSizeInBytes)
 		_, err = r.Read(im.Data)
 		if err != nil {
 			return nil, err
@@ -129,30 +120,19 @@ func (im *IMsg) Len() int {
 func (im IMsg) MarshalBinary() ([]byte, error) {
 	var buf bytes.Buffer
 
-	err := binary.Write(&buf, endianness, im.Type)
-	if err != nil {
-		return nil, err
-	}
-
 	if im.Len() > MaxSizeInBytes {
 		return nil, errors.New("imsg: imsg exceeds maximum length")
 	}
-	err = binary.Write(&buf, endianness, uint16(im.Len()))
-	if err != nil {
-		return nil, err
+
+	hdr := imsgHeader{
+		Type:   im.Type,
+		Length: uint16(im.Len()),
+		Flags:  im.flags,
+		PeerID: im.PeerID,
+		PID:    im.PID,
 	}
 
-	err = binary.Write(&buf, endianness, im.flags)
-	if err != nil {
-		return nil, err
-	}
-
-	err = binary.Write(&buf, endianness, im.PeerID)
-	if err != nil {
-		return nil, err
-	}
-
-	err = binary.Write(&buf, endianness, im.PID)
+	err := binary.Write(&buf, endianness, hdr)
 	if err != nil {
 		return nil, err
 	}
