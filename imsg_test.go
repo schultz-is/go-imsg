@@ -161,6 +161,10 @@ func TestMarshalBinary(t *testing.T) {
 	if err == nil {
 		t.Fatalf("incorrectly marshalled an imsg with oversized ancillary data")
 	}
+	var e *ErrDataTooLarge
+	if !errors.As(err, &e) {
+		t.Fatalf("failed to marshal an imsg in an unexpected way: %s", err)
+	}
 
 	// Restore the determined system endianness
 	endianness = systemEndianness
