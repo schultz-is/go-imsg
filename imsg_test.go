@@ -12,14 +12,14 @@ import (
 	"testing"
 )
 
-type marshalTest struct {
+type imsgTest struct {
 	name              string
 	imsg              *IMsg
 	littleEndianBytes []byte
 	bigEndianBytes    []byte
 }
 
-var marshalTests = []marshalTest{
+var imsgTests = []imsgTest{
 	{
 		"Empty imsg",
 		&IMsg{},
@@ -116,7 +116,7 @@ func TestMarshalBinary(t *testing.T) {
 	systemEndianness := endianness
 
 	var (
-		tt     marshalTest
+		tt     imsgTest
 		result []byte
 		err    error
 		edtl   *ErrDataTooLarge
@@ -124,7 +124,7 @@ func TestMarshalBinary(t *testing.T) {
 
 	// First run tests for little endian systems
 	endianness = binary.LittleEndian
-	for _, tt = range marshalTests {
+	for _, tt = range imsgTests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err = tt.imsg.MarshalBinary()
 			if err != nil {
@@ -139,7 +139,7 @@ func TestMarshalBinary(t *testing.T) {
 
 	// Next run tests for big endian systems
 	endianness = binary.BigEndian
-	for _, tt = range marshalTests {
+	for _, tt = range imsgTests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err = tt.imsg.MarshalBinary()
 			if err != nil {
@@ -173,7 +173,7 @@ func TestReadIMsg(t *testing.T) {
 	systemEndianness := endianness
 
 	var (
-		tt    marshalTest
+		tt    imsgTest
 		buf   *bytes.Reader
 		imsg  *IMsg
 		err   error
@@ -183,7 +183,7 @@ func TestReadIMsg(t *testing.T) {
 
 	// First run tests for little endian systems
 	endianness = binary.LittleEndian
-	for _, tt = range marshalTests {
+	for _, tt = range imsgTests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf = bytes.NewReader(tt.littleEndianBytes)
 			imsg, err = ReadIMsg(buf)
@@ -199,7 +199,7 @@ func TestReadIMsg(t *testing.T) {
 
 	// Next run tests for big endian systems
 	endianness = binary.BigEndian
-	for _, tt = range marshalTests {
+	for _, tt = range imsgTests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf = bytes.NewReader(tt.bigEndianBytes)
 			imsg, err = ReadIMsg(buf)
