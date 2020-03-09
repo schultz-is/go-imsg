@@ -40,6 +40,15 @@ func init() {
 	}
 }
 
+// This is a fixed-size header used to simplify marshaling and unmarshaling.
+type imsgHeader struct {
+	Type   uint32
+	Length uint16
+	Flags  uint16
+	PeerID uint32
+	PID    uint32
+}
+
 // An IMsg is a message used to aid inter-process communication over sockets,
 // often when processes with different privileges are required to cooperate.
 type IMsg struct {
