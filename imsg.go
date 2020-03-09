@@ -73,7 +73,7 @@ func ComposeIMsg(
 	data []byte,
 ) (*IMsg, error) {
 	if len(data) > (MaxSizeInBytes - HeaderSizeInBytes) {
-		return nil, errors.New("imsg: provided data is too large")
+		return nil, &ErrDataTooLarge{len(data), (MaxSizeInBytes - HeaderSizeInBytes)}
 	}
 
 	return &IMsg{
