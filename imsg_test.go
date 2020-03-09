@@ -216,6 +216,15 @@ func TestReadIMsg(t *testing.T) {
 		t.Fatalf("incorrectly read an imsg with invalidly large length")
 	}
 
+	// Ensure messages smaller than the header size don't get unmershalled
+	buf = bytes.NewReader(
+		[]byte{0, 0, 0}, // smaller than the uint32 that describes the Type field
+	)
+	_, err = ReadIMsg(buf)
+	if err == nil {
+		t.Fatalf("incorrectly read a malformed imsg")
+	}
+
 	// Restore the determined system endianness
 	endianness = systemEndianness
 }
