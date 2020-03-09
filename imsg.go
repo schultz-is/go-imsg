@@ -117,7 +117,10 @@ func ReadIMsg(r io.Reader) (*IMsg, error) {
 		}
 
 		if n != int(hdr.Length)-HeaderSizeInBytes {
-			return nil, errors.New("imsg: could not read full message body")
+			return nil, &ErrInsufficientData{
+				hdr.Length - HeaderSizeInBytes,
+				n,
+			}
 		}
 	}
 
