@@ -216,6 +216,22 @@ func TestReadIMsg(t *testing.T) {
 		t.Fatalf("incorrectly read an imsg with invalidly large length")
 	}
 
+	buf = bytes.NewReader(
+		[]byte{
+			0, 0, 0, 0,
+			0, 0xff,
+			0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+
+			1, 2, 3, 4,
+		},
+	)
+	_, err = ReadIMsg(buf)
+	if err == nil {
+		t.Fatalf("incorrectly read an imsg with invalidly short ancillary data")
+	}
+
 	// Ensure messages smaller than the header size don't get unmershalled
 	buf = bytes.NewReader(
 		[]byte{0, 0, 0}, // smaller than the uint32 that describes the Type field
