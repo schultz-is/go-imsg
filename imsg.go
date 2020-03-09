@@ -8,7 +8,6 @@ package imsg
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"io"
 	"os"
 	"unsafe"
@@ -137,7 +136,11 @@ func (im IMsg) MarshalBinary() ([]byte, error) {
 	var buf bytes.Buffer
 
 	if im.Len() > MaxSizeInBytes {
-		return nil, errors.New("imsg: imsg exceeds maximum length")
+		return nil, &ErrLengthOutOfBounds{
+			uint16(im.Len()),
+			HeaderSizeInBytes,
+			MaxSizeInBytes,
+		}
 	}
 
 	hdr := imsgHeader{
