@@ -89,37 +89,19 @@ func ComposeIMsg(
 func ReadIMsg(r io.Reader) (*IMsg, error) {
 	im := &IMsg{}
 
-	err := binary.Read(r, endianness, &(im.Type))
+	var hdr imsgHeader
+	err := binary.Read(r, endianness, &hdr)
 	if err != nil {
 		return nil, err
 	}
 
-	var msgLen uint16
-	err = binary.Read(r, endianness, &msgLen)
-	if err != nil {
-		return nil, err
-	}
-	if msgLen < HeaderSizeInBytes || msgLen > MaxSizeInBytes {
-		return nil, errors.New("imsg: invalid imsg length received")
-	}
+	im.Type = hdr.Type
+	im.PeerID = hdr.PeerID
+	im.PID = hdr.PID
+	im.flags = hdr.Flags
 
-	err = binary.Read(r, endianness, &(im.flags))
-	if err != nil {
-		return nil, err
-	}
-
-	err = binary.Read(r, endianness, &(im.PeerID))
-	if err != nil {
-		return nil, err
-	}
-
-	err = binary.Read(r, endianness, &(im.PID))
-	if err != nil {
-		return nil, err
-	}
-
-	if msgLen > HeaderSizeInBytes {
-		im.Data = make([]byte, msgLen-HeaderSizeInBytes)
+	if hdr.Length > HeaderSizeInBytes {
+		im.Data = make([]byte, hdr.Length-HeaderSizeInBytes)
 		_, err = r.Read(im.Data)
 		if err != nil {
 			return nil, err
