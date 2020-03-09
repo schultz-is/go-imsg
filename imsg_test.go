@@ -209,6 +209,10 @@ func TestReadIMsg(t *testing.T) {
 		})
 	}
 
+	var (
+		eloob *ErrLengthOutOfBounds
+	)
+
 	// Ensure imsgs that have an invalid length aren't unmarshalled
 	buf = bytes.NewReader(
 		[]byte{
@@ -223,6 +227,9 @@ func TestReadIMsg(t *testing.T) {
 	if err == nil {
 		t.Fatalf("incorrectly read an imsg with invalidly small length")
 	}
+	if !errors.As(err, &eloob) {
+		t.Fatalf("failed to read an imsg in an unexpected way: %s", err)
+	}
 
 	buf = bytes.NewReader(
 		[]byte{
@@ -236,6 +243,9 @@ func TestReadIMsg(t *testing.T) {
 	_, err = ReadIMsg(buf)
 	if err == nil {
 		t.Fatalf("incorrectly read an imsg with invalidly large length")
+	}
+	if !errors.As(err, &eloob) {
+		t.Fatalf("failed to read an imsg in an unexpected way: %s", err)
 	}
 
 	buf = bytes.NewReader(
