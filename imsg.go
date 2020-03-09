@@ -136,10 +136,9 @@ func (im IMsg) MarshalBinary() ([]byte, error) {
 	var buf bytes.Buffer
 
 	if im.Len() > MaxSizeInBytes {
-		return nil, &ErrLengthOutOfBounds{
-			uint16(im.Len()),
-			HeaderSizeInBytes,
-			MaxSizeInBytes,
+		return nil, &ErrDataTooLarge{
+			len(im.Data),
+			MaxSizeInBytes - HeaderSizeInBytes,
 		}
 	}
 
