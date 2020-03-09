@@ -120,30 +120,19 @@ func (im *IMsg) Len() int {
 func (im IMsg) MarshalBinary() ([]byte, error) {
 	var buf bytes.Buffer
 
-	err := binary.Write(&buf, endianness, im.Type)
-	if err != nil {
-		return nil, err
-	}
-
 	if im.Len() > MaxSizeInBytes {
 		return nil, errors.New("imsg: imsg exceeds maximum length")
 	}
-	err = binary.Write(&buf, endianness, uint16(im.Len()))
-	if err != nil {
-		return nil, err
+
+	hdr := imsgHeader{
+		Type:   im.Type,
+		Length: uint16(im.Len()),
+		Flags:  im.flags,
+		PeerID: im.PeerID,
+		PID:    im.PID,
 	}
 
-	err = binary.Write(&buf, endianness, im.flags)
-	if err != nil {
-		return nil, err
-	}
-
-	err = binary.Write(&buf, endianness, im.PeerID)
-	if err != nil {
-		return nil, err
-	}
-
-	err = binary.Write(&buf, endianness, im.PID)
+	err := binary.Write(&buf, endianness, hdr)
 	if err != nil {
 		return nil, err
 	}
