@@ -7,6 +7,7 @@ package imsg
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -89,6 +90,27 @@ var marshalTests = []marshalTest{
 			0x74, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x67,
 		},
 	},
+}
+
+func TestComposeIMsg(t *testing.T) {
+	// Assemble a valid imsg
+	_, err := ComposeIMsg(0, 0, nil)
+	if err != nil {
+		t.Fatalf("failed to compose valid imsg")
+	}
+
+	// Assemble an invalid imsg
+	_, err = ComposeIMsg(0, 0, make([]byte, MaxSizeInBytes+1))
+	if err == nil {
+		t.Fatalf("incorrectly composed an invalid imsg")
+	}
+
+	// Make sure the failure was due to the expected case of the ancillary data
+	// being too large
+	var e *ErrDataTooLarge
+	if !errors.As(err, &e) {
+		t.Fatalf("failed to compose an imsg in an unexpected way: %s", err)
+	}
 }
 
 func TestMarshalBinary(t *testing.T) {
