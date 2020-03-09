@@ -15,7 +15,7 @@ and [tmux](https://github.com/tmux/tmux).
 ### Message Creation
 
 The easiest way to create an imsg using this library is to call the
-`ComposeIMsg` package method. Doing so will automatically populate the `PID`
+`ComposeIMsg()` package method. Doing so will automatically populate the `PID`
 by calling `os.Getpid()` as a convenience. For example:
 
 ```go
@@ -113,7 +113,7 @@ import (
 )
 
 func main() {
-  buf := bytes.NewBuffer(
+  buf := bytes.NewReader(
     []byte{
       0xaa, 0xaa, 0xaa, 0xaa, // type
       0x1d, 0x00,             // len
