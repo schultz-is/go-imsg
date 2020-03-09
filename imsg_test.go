@@ -93,6 +93,8 @@ var marshalTests = []marshalTest{
 }
 
 func TestComposeIMsg(t *testing.T) {
+	var edtl *ErrDataTooLarge
+
 	// Assemble a valid imsg
 	_, err := ComposeIMsg(0, 0, nil)
 	if err != nil {
@@ -104,11 +106,7 @@ func TestComposeIMsg(t *testing.T) {
 	if err == nil {
 		t.Fatalf("incorrectly composed an invalid imsg")
 	}
-
-	// Make sure the failure was due to the expected case of the ancillary data
-	// being too large
-	var e *ErrDataTooLarge
-	if !errors.As(err, &e) {
+	if !errors.As(err, &edtl) {
 		t.Fatalf("failed to compose an imsg in an unexpected way: %s", err)
 	}
 }
@@ -121,6 +119,7 @@ func TestMarshalBinary(t *testing.T) {
 		tt     marshalTest
 		result []byte
 		err    error
+		edtl   *ErrDataTooLarge
 	)
 
 	// First run tests for little endian systems
@@ -161,8 +160,7 @@ func TestMarshalBinary(t *testing.T) {
 	if err == nil {
 		t.Fatalf("incorrectly marshalled an imsg with oversized ancillary data")
 	}
-	var e *ErrDataTooLarge
-	if !errors.As(err, &e) {
+	if !errors.As(err, &edtl) {
 		t.Fatalf("failed to marshal an imsg in an unexpected way: %s", err)
 	}
 
@@ -175,10 +173,12 @@ func TestReadIMsg(t *testing.T) {
 	systemEndianness := endianness
 
 	var (
-		tt   marshalTest
-		buf  *bytes.Reader
-		imsg *IMsg
-		err  error
+		tt    marshalTest
+		buf   *bytes.Reader
+		imsg  *IMsg
+		err   error
+		eloob *ErrLengthOutOfBounds
+		eid   *ErrInsufficientData
 	)
 
 	// First run tests for little endian systems
@@ -212,11 +212,6 @@ func TestReadIMsg(t *testing.T) {
 			}
 		})
 	}
-
-	var (
-		eloob *ErrLengthOutOfBounds
-		eid   *ErrInsufficientData
-	)
 
 	// Ensure imsgs that have an invalid length aren't unmarshalled
 	buf = bytes.NewReader(
