@@ -192,6 +192,9 @@ func TestReadIMsg(t *testing.T) {
 		[]byte{
 			0, 0, 0, 0, // type
 			0, 0, // length < header size
+			0, 0, // flags
+			0, 0, 0, 0, // peer id
+			0, 0, 0, 0, // pid
 		},
 	)
 	_, err = ReadIMsg(buf)
@@ -203,11 +206,39 @@ func TestReadIMsg(t *testing.T) {
 		[]byte{
 			0, 0, 0, 0, // type
 			0xff, 0xff, // length > maximum size
+			0, 0, // flags
+			0, 0, 0, 0, // peer id
+			0, 0, 0, 0, // pid
 		},
 	)
 	_, err = ReadIMsg(buf)
 	if err == nil {
 		t.Fatalf("incorrectly read an imsg with invalidly large length")
+	}
+
+	buf = bytes.NewReader(
+		[]byte{
+			0, 0, 0, 0,
+			0, 0xff,
+			0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+
+			1, 2, 3, 4,
+		},
+	)
+	_, err = ReadIMsg(buf)
+	if err == nil {
+		t.Fatalf("incorrectly read an imsg with invalidly short ancillary data")
+	}
+
+	// Ensure messages smaller than the header size don't get unmershalled
+	buf = bytes.NewReader(
+		[]byte{0, 0, 0}, // smaller than the uint32 that describes the Type field
+	)
+	_, err = ReadIMsg(buf)
+	if err == nil {
+		t.Fatalf("incorrectly read a malformed imsg")
 	}
 
 	// Restore the determined system endianness

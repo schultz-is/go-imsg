@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"unsafe"
@@ -95,6 +96,14 @@ func ReadIMsg(r io.Reader) (*IMsg, error) {
 		return nil, err
 	}
 
+	if hdr.Length < HeaderSizeInBytes {
+		return nil, fmt.Errorf("imsg: message length too small (%d bytes)", hdr.Length)
+	}
+
+	if hdr.Length > MaxSizeInBytes {
+		return nil, fmt.Errorf("imsg: message length too large (%d bytes)", hdr.Length)
+	}
+
 	im.Type = hdr.Type
 	im.PeerID = hdr.PeerID
 	im.PID = hdr.PID
@@ -102,9 +111,14 @@ func ReadIMsg(r io.Reader) (*IMsg, error) {
 
 	if hdr.Length > HeaderSizeInBytes {
 		im.Data = make([]byte, hdr.Length-HeaderSizeInBytes)
-		_, err = r.Read(im.Data)
+
+		n, err := r.Read(im.Data)
 		if err != nil {
 			return nil, err
+		}
+
+		if n != int(hdr.Length)-HeaderSizeInBytes {
+			return nil, errors.New("imsg: could not read full message body")
 		}
 	}
 
