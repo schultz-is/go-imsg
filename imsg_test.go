@@ -211,6 +211,7 @@ func TestReadIMsg(t *testing.T) {
 
 	var (
 		eloob *ErrLengthOutOfBounds
+		eid   *ErrInsufficientData
 	)
 
 	// Ensure imsgs that have an invalid length aren't unmarshalled
@@ -262,6 +263,9 @@ func TestReadIMsg(t *testing.T) {
 	_, err = ReadIMsg(buf)
 	if err == nil {
 		t.Fatalf("incorrectly read an imsg with invalidly short ancillary data")
+	}
+	if !errors.As(err, &eid) {
+		t.Fatalf("failed to read an imsg in an unexpected way: %s", err)
 	}
 
 	// Ensure messages smaller than the header size don't get unmershalled
