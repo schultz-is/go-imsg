@@ -192,6 +192,9 @@ func TestReadIMsg(t *testing.T) {
 		[]byte{
 			0, 0, 0, 0, // type
 			0, 0, // length < header size
+			0, 0, // flags
+			0, 0, 0, 0, // peer id
+			0, 0, 0, 0, // pid
 		},
 	)
 	_, err = ReadIMsg(buf)
@@ -203,6 +206,9 @@ func TestReadIMsg(t *testing.T) {
 		[]byte{
 			0, 0, 0, 0, // type
 			0xff, 0xff, // length > maximum size
+			0, 0, // flags
+			0, 0, 0, 0, // peer id
+			0, 0, 0, 0, // pid
 		},
 	)
 	_, err = ReadIMsg(buf)
