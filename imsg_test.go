@@ -292,3 +292,11 @@ func TestSystemEndianness(t *testing.T) {
 	// Restore the determined system endianness
 	endianness = systemEndianness
 }
+
+func TestLen(t *testing.T) {
+	imsg := &IMsg{}
+
+	if imsg.Len() != HeaderSizeInBytes {
+		t.Fatalf("empty imsg length (%d) should match header length (%d)", imsg.Len(), HeaderSizeInBytes)
+	}
+}
