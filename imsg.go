@@ -8,8 +8,6 @@ package imsg
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
-	"fmt"
 	"io"
 	"os"
 	"unsafe"
@@ -73,7 +71,7 @@ func ComposeIMsg(
 	data []byte,
 ) (*IMsg, error) {
 	if len(data) > (MaxSizeInBytes - HeaderSizeInBytes) {
-		return nil, errors.New("imsg: provided data is too large")
+		return nil, &ErrDataTooLarge{len(data), (MaxSizeInBytes - HeaderSizeInBytes)}
 	}
 
 	return &IMsg{
@@ -96,12 +94,12 @@ func ReadIMsg(r io.Reader) (*IMsg, error) {
 		return nil, err
 	}
 
-	if hdr.Length < HeaderSizeInBytes {
-		return nil, fmt.Errorf("imsg: message length too small (%d bytes)", hdr.Length)
-	}
-
-	if hdr.Length > MaxSizeInBytes {
-		return nil, fmt.Errorf("imsg: message length too large (%d bytes)", hdr.Length)
+	if hdr.Length < HeaderSizeInBytes || hdr.Length > MaxSizeInBytes {
+		return nil, &ErrLengthOutOfBounds{
+			hdr.Length,
+			HeaderSizeInBytes,
+			MaxSizeInBytes,
+		}
 	}
 
 	im.Type = hdr.Type
@@ -118,7 +116,10 @@ func ReadIMsg(r io.Reader) (*IMsg, error) {
 		}
 
 		if n != int(hdr.Length)-HeaderSizeInBytes {
-			return nil, errors.New("imsg: could not read full message body")
+			return nil, &ErrInsufficientData{
+				hdr.Length - HeaderSizeInBytes,
+				n,
+			}
 		}
 	}
 
@@ -135,7 +136,10 @@ func (im IMsg) MarshalBinary() ([]byte, error) {
 	var buf bytes.Buffer
 
 	if im.Len() > MaxSizeInBytes {
-		return nil, errors.New("imsg: imsg exceeds maximum length")
+		return nil, &ErrDataTooLarge{
+			len(im.Data),
+			MaxSizeInBytes - HeaderSizeInBytes,
+		}
 	}
 
 	hdr := imsgHeader{

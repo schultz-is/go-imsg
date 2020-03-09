@@ -7,6 +7,7 @@ package imsg
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -91,6 +92,25 @@ var marshalTests = []marshalTest{
 	},
 }
 
+func TestComposeIMsg(t *testing.T) {
+	var edtl *ErrDataTooLarge
+
+	// Assemble a valid imsg
+	_, err := ComposeIMsg(0, 0, nil)
+	if err != nil {
+		t.Fatalf("failed to compose valid imsg")
+	}
+
+	// Assemble an invalid imsg
+	_, err = ComposeIMsg(0, 0, make([]byte, MaxSizeInBytes+1))
+	if err == nil {
+		t.Fatalf("incorrectly composed an invalid imsg")
+	}
+	if !errors.As(err, &edtl) {
+		t.Fatalf("failed to compose an imsg in an unexpected way: %s", err)
+	}
+}
+
 func TestMarshalBinary(t *testing.T) {
 	// Store out the determined system endianness before manually manipulating it
 	systemEndianness := endianness
@@ -99,6 +119,7 @@ func TestMarshalBinary(t *testing.T) {
 		tt     marshalTest
 		result []byte
 		err    error
+		edtl   *ErrDataTooLarge
 	)
 
 	// First run tests for little endian systems
@@ -139,6 +160,9 @@ func TestMarshalBinary(t *testing.T) {
 	if err == nil {
 		t.Fatalf("incorrectly marshalled an imsg with oversized ancillary data")
 	}
+	if !errors.As(err, &edtl) {
+		t.Fatalf("failed to marshal an imsg in an unexpected way: %s", err)
+	}
 
 	// Restore the determined system endianness
 	endianness = systemEndianness
@@ -149,10 +173,12 @@ func TestReadIMsg(t *testing.T) {
 	systemEndianness := endianness
 
 	var (
-		tt   marshalTest
-		buf  *bytes.Reader
-		imsg *IMsg
-		err  error
+		tt    marshalTest
+		buf   *bytes.Reader
+		imsg  *IMsg
+		err   error
+		eloob *ErrLengthOutOfBounds
+		eid   *ErrInsufficientData
 	)
 
 	// First run tests for little endian systems
@@ -201,6 +227,9 @@ func TestReadIMsg(t *testing.T) {
 	if err == nil {
 		t.Fatalf("incorrectly read an imsg with invalidly small length")
 	}
+	if !errors.As(err, &eloob) {
+		t.Fatalf("failed to read an imsg in an unexpected way: %s", err)
+	}
 
 	buf = bytes.NewReader(
 		[]byte{
@@ -214,6 +243,9 @@ func TestReadIMsg(t *testing.T) {
 	_, err = ReadIMsg(buf)
 	if err == nil {
 		t.Fatalf("incorrectly read an imsg with invalidly large length")
+	}
+	if !errors.As(err, &eloob) {
+		t.Fatalf("failed to read an imsg in an unexpected way: %s", err)
 	}
 
 	buf = bytes.NewReader(
@@ -230,6 +262,9 @@ func TestReadIMsg(t *testing.T) {
 	_, err = ReadIMsg(buf)
 	if err == nil {
 		t.Fatalf("incorrectly read an imsg with invalidly short ancillary data")
+	}
+	if !errors.As(err, &eid) {
+		t.Fatalf("failed to read an imsg in an unexpected way: %s", err)
 	}
 
 	// Ensure messages smaller than the header size don't get unmershalled
