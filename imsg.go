@@ -14,11 +14,10 @@ import (
 )
 
 const (
-	// An imsg header is 16 bytes of information that precede the data being
-	// transmitted or received.
+	// HeaderSizeInBytes is the size in bytes of the fixed-length header that
+	// prepends each imsg.
 	HeaderSizeInBytes = 16
-	// Single imsgs should not be larger than the currently defined maximum of
-	// 16384 bytes.
+	// MaxSizeInBytes is the maximum allowed size in bytes of a single imsg.
 	MaxSizeInBytes = 16384
 )
 
