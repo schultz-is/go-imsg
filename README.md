@@ -1,6 +1,9 @@
 # go-imsg
 
 ![Tests](https://github.com/schultz-is/go-imsg/workflows/Tests/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/schultz-is/go-imsg)](https://goreportcard.com/report/github.com/schultz-is/go-imsg)
+[![GoDoc](https://godoc.org/github.com/schultz-is/go-imsg?status.svg)](https://pkg.go.dev/github.com/schultz-is/go-imsg)
+[![License](https://img.shields.io/github/license/schultz-is/go-imsg)](./LICENSE)
 
 This package provides tooling around OpenBSD's
 [imsg functions](https://man.openbsd.org/imsg_init.3).These imsg functions are
