@@ -1,13 +1,15 @@
-PKGS := $(shell go list ./... | grep -v /vendor)
-
-.PHONY: lint
-lint:
-	golangci-lint run -v ./...
-
 .PHONY: test
 test:
-	go test -v $(PKGS)
+	go test -v -coverprofile coverage.out ./...
 
-.PHONY: staticcheck
-staticcheck:
-	staticcheck $(PKGS)
+.PHONY: coverage
+coverage:
+	go tool cover -html coverage.out
+
+.PHONY: vet
+vet:
+	go vet -v ./...
+
+.PHONY: clean
+clean:
+	rm coverage.out
